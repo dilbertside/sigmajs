@@ -8,18 +8,17 @@
 	</parent>
 	<groupId>org.webjars</groupId>
 	<artifactId>sigmajs</artifactId>
-	<version>1.0.3</version>
+	<version>1.0.4-SNAPSHOT</version>
 	<name>sigmajs</name>
 	<description>WebJar for sigmajs</description>
 	<url>http://webjars.org</url>
-
+  
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<upstream.version>1.0.3</upstream.version>
-		<upstream.directory>v${upstream.version}</upstream.directory>
+		<upstream.directory>v${project.version}</upstream.directory>
 		<!-- https://github.com/jacomyal/sigma.js/releases/download/v1.0.3/release-v1.0.3.zip -->
-		<upstream.file>release-v${upstream.version}.zip</upstream.file>
-		<upstream.url>https://github.com/jacomyal/sigma.js/releases/download/${upstream.directory}/${upstream.file}</upstream.url>
+		<upstream.file>release-v${project.version}.zip</upstream.file>
+		<upstream.url>https://github.com/jacomyal/sigma.js/archive/master.zip</upstream.url>
 		<destDir>${project.build.outputDirectory}/META-INF/resources/webjars/${project.artifactId}/${project.version}</destDir>
 		<requirejs>
 			{
@@ -72,12 +71,32 @@
 								<echo message="download archive..." />
 								<get src="${upstream.url}" dest="${project.build.directory}/${project.artifactId}.zip" />
 								<echo message="unzip archive..." />
-								<unzip src="${project.build.directory}/${project.artifactId}.zip" dest="${project.build.directory}/${project.artifactId}-${upstream.version}" />
+								<unzip src="${project.build.directory}/${project.artifactId}.zip" dest="${project.build.directory}/${project.artifactId}-${project.version}">
+								  <mapper>
+										<!-- Strip leading directory off each path sigma.js-master-->
+										<cutdirsmapper dirs="1" />
+									</mapper>
+								</unzip>
 								<echo message="unzip done" />
+								<!-- from http://addyosmani.com/blog/making-maven-grunt/ -->
+								<echo message="npm config"/>
+								<exec executable="bash" dir="${project.build.directory}/${project.artifactId}-${project.version}" osfamily="unix" failonerror="true">
+				            <arg line="npm config set color false"/>
+				        </exec>
+				        <echo message="npm install"/>
+								<exec executable="bash" dir="${project.build.directory}/${project.artifactId}-${project.version}" osfamily="unix" failonerror="true">
+				            <arg line="npm install"/>
+				        </exec>
+				        <echo message="npm run build"/>
+                <exec executable="bash" dir="${project.build.directory}/${project.artifactId}-${project.version}" osfamily="unix" failonerror="true">
+                    <arg line="npm run build"/>
+                </exec>
+        
 								<echo message="moving resources.." />
 								<move todir="${destDir}">
-									<fileset dir="${project.build.directory}/${project.artifactId}-${upstream.version}" />
+									<fileset dir="${project.build.directory}/${project.artifactId}-${project.version}" />
 								</move>
+								
 							</target>
 						</configuration>
 					</execution>
